@@ -137,3 +137,11 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# TS Router files
+dist-ssr
+*.local
+count.txt
+.env
+.nitro
+.tanstack
