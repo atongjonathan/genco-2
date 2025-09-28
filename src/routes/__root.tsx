@@ -1,10 +1,14 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanstackDevtools } from '@tanstack/react-devtools'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'admin-lte/dist/css/adminlte.min.css'
+import type { AuthState } from '@/auth'
 
-export const Route = createRootRoute({
+interface MyRouterContext {
+  auth: AuthState
+}
+export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
       <Outlet />

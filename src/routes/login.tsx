@@ -27,8 +27,8 @@ function RouteComponent() {
             <div className="row">
               <div className="col-8">
                 <div className="form-check">
-                  <input className="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
-                  <label className="form-check-label" for="flexCheckDefault"> Remember Me </label>
+                  <input title='Remember Me' className="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
+                  <label className="form-check-label" > Remember Me </label>
                 </div>
               </div>
               <div className="col-4">
