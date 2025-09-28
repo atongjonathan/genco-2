@@ -8,10 +8,15 @@ function RouteComponent() {
   return (
     <div className='h-screen flex items-center'>
       <div className="login-box mx-auto my-auto min-w-max">
-        <div className="login-logo">
-          <a href="../index2.html"><b>Admin</b>LTE</a>
-        </div>
-        <div className="card card-outline card-primary">
+        <div className="login-logo flex justify-center items-center gap-3">
+          <a href="/"> <img
+          src={'/logo%20copy.png'}
+          className="h-[10vmin] pointer-events-none"
+          alt="logo"
+        /></a>
+        <b>Savanna Herds</b>
+      </div>
+      <div className="card card-outline card-primary">
         <div className="card-body login-card-body">
           <p className="login-box-msg">Sign in to start your session</p>
           <form action="../index3.html" method="post">
