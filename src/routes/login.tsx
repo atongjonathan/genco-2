@@ -2,7 +2,7 @@ import { useAuth } from '@/auth'
 import { findUser } from '@/firebase/data'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Navigate, useNavigate } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/login')({
   component: RouteComponent,
@@ -19,7 +19,8 @@ function RouteComponent() {
     }
   })
 
-  const { signIn } = useAuth();
+  const { signIn, login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const loginMutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {
@@ -27,12 +28,22 @@ function RouteComponent() {
     },
     onSuccess: async () => {
       const user = await findUser(form.getFieldValue('email'));
-      console.log(user);
+      login(user!);      
+
+      navigate({
+        to: '/'
+      });
     }, 
     onError: (error) => {
       alert('Login failed: ' + (error as Error).message);
     }
   })
+
+  if (isAuthenticated) {
+    return (
+      <Navigate to="/" />
+    )
+  }
 
   return (
     <div className='h-screen flex items-center'>
@@ -49,9 +60,9 @@ function RouteComponent() {
         <div className="card-body login-card-body">
           <p className="login-box-msg">Sign in to start your session</p>
           <form  onSubmit={(e) => {
-        e.preventDefault()
-        form.handleSubmit()
-      }}>
+          e.preventDefault()
+          form.handleSubmit()
+        }}>
             <div className="input-group mb-3">
                <form.Field
                 name="email"
@@ -81,8 +92,12 @@ function RouteComponent() {
                 </div>
               </div>
               <div className="col-4">
-                <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary">Sign In</button>
+                <div className="d-grid gap-2">                
+                  <button type="submit" className="btn btn-primary">
+                    {loginMutation.isPending ? 
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                     : <span className="btn-text">Sign in</span>}
+                  </button>
                 </div>
               </div>
             </div>
