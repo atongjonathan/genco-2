@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './auth.tsx'
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 import { router } from './router.tsx'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
@@ -18,15 +19,19 @@ function InnerApp() {
   const auth = useAuth()
   return <RouterProvider router={router} context={{ auth }} />
 }
+const queryClient = new QueryClient()
+
 // Render the app
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <AuthProvider>
-        <InnerApp />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>    
+        <AuthProvider>
+          <InnerApp />
+        </AuthProvider>
+      </QueryClientProvider>
     </StrictMode>,
   )
 }

@@ -1,5 +1,8 @@
+import { type DocumentData } from "firebase/firestore";
 import { createContext, useContext, useState } from "react";
 import { type ReactNode } from "react";
+import { auth } from "./firebase/config";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export interface User {
   name: string;
@@ -11,11 +14,13 @@ export interface User {
 export interface AuthState {
   isAuthenticated: boolean
   user: User | null
-  login: (user: User) => void;
+  signIn: (email: string, password: string) => Promise<DocumentData>,
   logout: () => void
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
+
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -27,12 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
 
-  const login = (user: User) => {
-    const picture = `https://ui-avatars.com/api/?name=${user.name ?? user.email}&rounded=true&background=3559c7&size=35&color=fff`;
-    let userWithPic = { ...user, picture }
-    setUser(userWithPic);
-    localStorage.setItem("user", JSON.stringify(userWithPic)); // ✅ Persist login
-  };
+    const signIn = async (email: string, password: string): Promise<DocumentData> => await signInWithEmailAndPassword(auth, email, password);
+
+
+ 
 
   const logout = () => {
     setUser(null);
@@ -42,9 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
   };
 
-  return <AuthContext.Provider value={{isAuthenticated, user, login, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{isAuthenticated, user, signIn, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  return useContext(AuthContext) ?? { isAuthenticated: false, user: null, login: () => { }, logout: () => { } }; // ✅ Prevents crashes
+  return useContext(AuthContext) ?? {
+    isAuthenticated: false,
+    user: null,
+    signIn: async () => Promise.resolve({}), // <-- returns a Promise<DocumentData>
+    logout: () => {},
+  }
 }
