@@ -1,18 +1,12 @@
-import { getDocs, collection, type DocumentData } from "firebase/firestore";
+import { getDocs, collection, type DocumentData, query, limit, getDoc } from "firebase/firestore";
 import { db } from "./config";
 import type { User } from "@/auth";
 
 export const fetchUsers = async () => {
-    const querySnapshot = await getDocs(collection(db, 'users'));
-    const users: DocumentData[] = []
-    querySnapshot.forEach((doc) => {
-        let docData = doc.data()
-        docData.docId = doc.id
-        users.push(docData)
-    }
-    )
+    const users = await fetchDataFromCollection('users') as User[];
     return users
 }
+
 export const findUser = async (email: string): Promise<User | null> => {
     const users = await fetchUsers();
     const userData = users.find((user) => user.email === email);
@@ -20,3 +14,12 @@ export const findUser = async (email: string): Promise<User | null> => {
     const user = { email: userData?.email, name: userData?.name, role: userData?.role, picture } as User;
     return user || null;
 };
+
+// Helper function to fetch data from Firestore
+export const fetchDataFromCollection = async (collectionName: string, count = Infinity) => {
+    const q = query(collection(db, collectionName), limit(count));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc: { [k: string]: any }) => ({ id: doc.id, ...doc.data() }));
+
+};
+

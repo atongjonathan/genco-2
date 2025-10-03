@@ -3,7 +3,6 @@ import { createContext, useContext, useState } from "react";
 import { type ReactNode } from "react";
 import { auth } from "./firebase/config";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useNavigate } from "@tanstack/react-router";
 
 export interface User {
   name: string;
@@ -30,7 +29,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
-  const navigate = useNavigate();
 
   const signIn = async (email: string, password: string): Promise<DocumentData> => await signInWithEmailAndPassword(auth, email, password);
 
@@ -45,7 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user"); // ✅ Clear storage on logout
-    navigate({ to: '/login' })
     
   };
 

@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 
 const Sidebar = () => {
   return (
@@ -35,36 +36,12 @@ const Sidebar = () => {
             >
 
               <li className="nav-item">
-                <a href="./docs/browser-support.html" className="nav-link">
-                  <i className="nav-icon bi bi-browser-edge"></i>
-                  <p>Browser Support</p>
-                </a>
+                <Link to="/" className="nav-link">
+                  <i className="nav-icon bi bi-house"></i>
+                  <p>Dashboard</p>
+                </Link>
               </li>
-              <li className="nav-item">
-                <a href="./docs/how-to-contribute.html" className="nav-link">
-                  <i className="nav-icon bi bi-hand-thumbs-up-fill"></i>
-                  <p>How To Contribute</p>
-                </a>
-              </li>
-              <li className="nav-item">
-                <a href="./docs/faq.html" className="nav-link">
-                  <i className="nav-icon bi bi-question-circle-fill"></i>
-                  <p>FAQ</p>
-                </a>
-              </li>
-              <li className="nav-item">
-                <a href="./docs/license.html" className="nav-link">
-                  <i className="nav-icon bi bi-patch-check-fill"></i>
-                  <p>License</p>
-                </a>
-              </li>
-              <li className="nav-header">MULTI LEVEL EXAMPLE</li>
-              <li className="nav-item">
-                <a href="#" className="nav-link">
-                  <i className="nav-icon bi bi-circle-fill"></i>
-                  <p>Level 1</p>
-                </a>
-              </li>
+            
             
               
             </ul>

@@ -11,7 +11,11 @@ function RouteComponent() {
      <div className="app-wrapper">
       <Header />
       <Sidebar />
+      <main className="app-main">
+      
       <Outlet />
+
+      </main>
     </div>
   )
 }
