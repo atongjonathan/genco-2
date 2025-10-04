@@ -2,20 +2,39 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { useState } from 'react';
 
 interface TableProps {
-    data: Record<string, any>[];
-    title: string;
-    columns: ColumnDef<Record<string, any>>[];
+  data: Record<string, any>[];
+  title: string;
+  columns: ColumnDef<Record<string, any>>[];
 }
 
 const Table = ({ data = [], title, columns }: TableProps) => {
+  const [sorting, setSorting] = useState<any>([]);
+
+  // Add numbering column as first column
+  const numberedColumns: ColumnDef<Record<string, any>>[] = [
+    {
+      id: 'rowNumber',
+      header: '#',
+      cell: (info) => info.row.index + 1,
+      enableSorting: false,
+      size: 40,
+    },
+    ...columns,
+  ];
+
   const table = useReactTable({
     data: data ?? [],
-    columns,
+    columns: numberedColumns,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -38,10 +57,32 @@ const Table = ({ data = [], title, columns }: TableProps) => {
                           ? { width: '40px' }
                           : undefined
                     }
+                    onClick={
+                      header.column.getCanSort()
+                        ? header.column.getToggleSortingHandler()
+                        : undefined
+                    }
+                    className={
+                      header.column.getCanSort() ? 'cursor-pointer' : ''
+                    }
                   >
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext(),
+                    )}
+                    {header.column.getCanSort() && (
+                      <span className="ms-1">
+                        {header.column.getIsSorted() === 'asc' ? (
+                          <i className="bi bi-sort-up" />
+                        ) : (
+                          ''
+                        )}
+                        {header.column.getIsSorted() === 'desc' ? (
+                          <i className="bi bi-sort-down" />
+                        ) : (
+                          ''
+                        )}
+                      </span>
                     )}
                   </th>
                 ))}

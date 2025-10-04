@@ -20,7 +20,7 @@ function InnerApp() {
   return <RouterProvider router={router} context={{ auth }} />;
 }
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
+  defaultOptions: { queries: { refetchOnWindowFocus: false, retry: true } },
 });
 
 // Render the app

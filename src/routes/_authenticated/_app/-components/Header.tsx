@@ -1,10 +1,9 @@
-import { useAuth } from '@/auth'
-import React, { useEffect } from 'react'
+import { useAuth } from '@/auth';
+import React, { useEffect } from 'react';
 
 const Header = () => {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
-
 
   // Sidebar closed by default on mobile
   useEffect(() => {
@@ -20,15 +19,13 @@ const Header = () => {
 
   // Click elsewhere closes sidebar
   useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
+    const handleDocumentClick = () => {
       const sidebar = document.querySelector('.main-sidebar');
       const toggler = document.querySelector('[data-lte-toggle="sidebar"]');
-      console.log(e.target, sidebar, toggler);
       if (
         document.body.classList.contains('sidebar-open') &&
         sidebar &&
         toggler
-       
       ) {
         document.body.classList.remove('sidebar-open');
         document.body.classList.add('sidebar-collapse');
@@ -53,8 +50,7 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     setDropdownOpen(false);
-
-  }
+  };
 
   return (
     <nav className="app-header navbar navbar-expand bg-body">
@@ -73,22 +69,29 @@ const Header = () => {
               <i className="bi bi-list"></i>
             </a>
           </li>
-          <li className="nav-item d-none d-md-block"><a href="#" className="nav-link">Home</a></li>
-          <li className="nav-item d-none d-md-block"><a href="#" className="nav-link">Contact</a></li>
+          {/* <li className="nav-item d-none d-md-block"><a href="#" className="nav-link">Home</a></li>
+          <li className="nav-item d-none d-md-block"><a href="#" className="nav-link">Contact</a></li> */}
         </ul>
         {/*end::Start Navbar Links*/}
         {/*begin::End Navbar Links*/}
         <ul className="navbar-nav ms-auto">
           {/*begin::User Menu Dropdown*/}
           <li className="nav-item dropdown user-menu" onClick={handleLogout}>
-            <a href="#" className="nav-link dropdown-toggle flex" data-bs-toggle="dropdown" onClick={() => setDropdownOpen(!dropdownOpen)}>
+            <a
+              href="#"
+              className="nav-link dropdown-toggle flex"
+              data-bs-toggle="dropdown"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
               <img
                 src={user?.picture}
                 className="user-image rounded-circle shadow"
                 alt="User Image"
               />
             </a>
-            <ul className={`dropdown-menu dropdown-menu-lg dropdown-menu-start ${dropdownOpen ? 'show' : ''}`}>
+            <ul
+              className={`dropdown-menu dropdown-menu-lg dropdown-menu-start ${dropdownOpen ? 'show' : ''}`}
+            >
               <li className="user-header text-bg-primary">
                 <img
                   src={user?.picture}
@@ -102,14 +105,24 @@ const Header = () => {
               </li>
               <li className="user-body">
                 <div className="row">
-                  <div className="col-4 text-center"><a href="#">Followers</a></div>
-                  <div className="col-4 text-center"><a href="#">Sales</a></div>
-                  <div className="col-4 text-center"><a href="#">Friends</a></div>
+                  <div className="col-4 text-center">
+                    <a href="#">Followers</a>
+                  </div>
+                  <div className="col-4 text-center">
+                    <a href="#">Sales</a>
+                  </div>
+                  <div className="col-4 text-center">
+                    <a href="#">Friends</a>
+                  </div>
                 </div>
               </li>
               <li className="user-footer">
-                <a href="#" className="btn btn-default btn-flat">Profile</a>
-                <a href="#" className="btn btn-default btn-flat float-end">Sign out</a>
+                <a href="#" className="btn btn-default btn-flat">
+                  Profile
+                </a>
+                <a href="#" className="btn btn-default btn-flat float-end">
+                  Sign out
+                </a>
               </li>
             </ul>
           </li>
@@ -119,7 +132,7 @@ const Header = () => {
       </div>
       {/*end::Container*/}
     </nav>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
