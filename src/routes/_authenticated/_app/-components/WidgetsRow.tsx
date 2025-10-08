@@ -67,7 +67,7 @@ const WidgetsRow = ({ farmers, filteredOfftakes }: WidgetsRowProps) => {
       description: `G: ${totalGoats} | S: ${totalSheep}`,
     },
     {
-      title: 'Farmers in Offtake',
+      title: 'Offtake',
       backgroundColor: 'warning',
       icon: 'person-check-fill',
       link: '/users',
@@ -84,7 +84,7 @@ const WidgetsRow = ({ farmers, filteredOfftakes }: WidgetsRowProps) => {
         currency: 'KES',
         minimumFractionDigits: 0,
       }),
-      description: `Based on selected dates`,
+      description: `Per dates`,
     },
   ];
 

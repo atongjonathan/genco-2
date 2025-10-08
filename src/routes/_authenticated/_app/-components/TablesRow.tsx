@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { FarmersData, Offtake } from './Content';
 import Table from './Table';
 
@@ -72,7 +73,10 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
 
   // --- Animal Census Per County ---
   const animalCensusPerCounty = () => {
-    const census: Record<string, { goats: number; cattle: number; sheep: number }> = {};
+    const census: Record<
+      string,
+      { goats: number; cattle: number; sheep: number }
+    > = {};
 
     Object.values(farmers).forEach((farmer) => {
       const county = farmer.county;
@@ -100,7 +104,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
       const county = offtake.county;
       const revenue = offtake.goats.reduce(
         (total, goat) => total + (parseInt(goat.price) || 0),
-        0
+        0,
       );
       countyRevenue[county] = (countyRevenue[county] || 0) + revenue;
     });
@@ -111,6 +115,24 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
     }));
   };
 
+  const revDistributionPerCountyData = useMemo(
+    () => revDistributionPerCounty(),
+    [filteredOfftakes],
+  );
+  const farmersInOfftakeData = useMemo(
+    () => farmersInOfftakePerCounty(),
+    [filteredOfftakes],
+  );
+  const farmersRegisteredData = useMemo(
+    () => farmersRegisteredPerCounty(),
+    [farmers],
+  );
+  const animalCensusData = useMemo(() => animalCensusPerCounty(), [farmers]);
+  const countiesPerRevenueData = useMemo(
+    () => countiesPerRevenue(),
+    [filteredOfftakes],
+  );
+
   // --- Table Definitions ---
   const tables = [
     {
@@ -119,7 +141,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Revenue (KES)', accessorKey: 'totalRev' },
       ],
-      data: revDistributionPerCounty(),
+      data: revDistributionPerCountyData,
     },
     {
       title: 'Farmers in Offtake Per County',
@@ -127,7 +149,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Farmers', accessorKey: 'farmers' },
       ],
-      data: farmersInOfftakePerCounty(),
+      data: farmersInOfftakeData,
     },
     {
       title: 'Animal Census Per County',
@@ -137,7 +159,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'Cattle', accessorKey: 'totalCattle' },
         { header: 'Sheep', accessorKey: 'totalSheep' },
       ],
-      data: animalCensusPerCounty(),
+      data: animalCensusData,
     },
     {
       title: 'Farmers Registered Per County',
@@ -145,7 +167,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Total Farmers', accessorKey: 'farmers' },
       ],
-      data: farmersRegisteredPerCounty(),
+      data: farmersRegisteredData,
     },
     {
       title: 'Counties Per Revenue',
@@ -153,7 +175,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Revenue (KES)', accessorKey: 'revenue' },
       ],
-      data: countiesPerRevenue(),
+      data: countiesPerRevenueData,
     },
   ];
 
@@ -161,7 +183,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
     <div className="row">
       {tables.map((table, index) => (
         <div className="col-md-4 mb-4" key={index}>
-          <Table {...table} />
+          <Table {...table} searchable={false} />
         </div>
       ))}
     </div>
