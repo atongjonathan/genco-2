@@ -1,121 +1,99 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { fetchDataFromRealtimeDB } from '../../../../firebase/database';
-import type { FarmersData, OfftakeData } from './Content';
+import type { FarmersData, Offtake } from './Content';
 import Widget, { type WidgetProps } from './Widget';
 
-const WidgetsRow = () => {
-  const getValueFromQuery = (
-    query: UseQueryResult<any, Error>,
-    getValue: (data: any) => { value: string | number; description?: string },
-  ) => {
-    if (query.isLoading) return '...';
-    if (query.isError) return 'Error';
-    if (query.isSuccess) return getValue(query.data);
-    return 'N/A';
-  };
-  const fetchFarmersData = () =>
-    fetchDataFromRealtimeDB<FarmersData>('farmers');
-  const farmersQuery = useQuery({
-    queryKey: ['farmers-data'],
-    queryFn: () => fetchFarmersData(),
-  });
+type WidgetsRowProps = {
+  farmers: FarmersData | undefined;
+  filteredOfftakes: Offtake[];
+};
 
-  const offtakeQuery = useQuery({
-    queryKey: ['offtake-data'],
-    queryFn: () => fetchDataFromRealtimeDB('offtakes'),
-  });
-  const farmerData = getValueFromQuery(farmersQuery, (data) => ({
-    value: Object.keys(data).length,
-    description: `M: ${Object.values(data as FarmersData).filter((farmer) => farmer.gender === 'male').length} F: ${Object.values(data as FarmersData).filter((farmer) => farmer.gender === 'female').length}`,
-  }));
-
-  const animalsData = getValueFromQuery(farmersQuery, (data) => ({
-    value: Object.values(data as FarmersData).reduce(
-      (total, farmer) =>
-        total + (parseInt(farmer.goats) || 0) + (parseInt(farmer.sheep) || 0),
-      0,
-    ),
-    description: `G: ${Object.values(data as FarmersData).reduce(
-      (total, farmer) => total + (parseInt(farmer.goats) || 0),
-      0,
-    )} S: ${Object.values(data as FarmersData).reduce(
-      (total, farmer) => total + (parseInt(farmer.sheep) || 0),
-      0,
-    )}`,
-  }));
-  const revenueData = getValueFromQuery(offtakeQuery, (data) => ({
-    value: Object.values(data as OfftakeData)
-      .reduce(
-        (total, offtake) =>
-          total +
-          (parseInt(offtake.goats[0].price) || 0) *
-            (parseInt(offtake.goats[0].live) || 0),
-        0,
-      )
-      .toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'KES',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }),
-  }));
-
-  const farmerInOfftakeData = getValueFromQuery(offtakeQuery, (data) => {
-    const uniqueNames = new Set(
-      Object.values(data as OfftakeData).map((offtake) => offtake.name),
+const WidgetsRow = ({ farmers, filteredOfftakes }: WidgetsRowProps) => {
+  if (!farmers) {
+    return (
+      <div className="text-center py-5">
+        <span>Loading data...</span>
+      </div>
     );
-    return {
-      value: uniqueNames.size,
-      description: undefined,
-    };
-  });
+  }
+
+  // --- Farmers Data ---
+  const totalFarmers = Object.keys(farmers).length;
+  const maleFarmers = Object.values(farmers).filter(
+    (f) => f.gender === 'male',
+  ).length;
+  const femaleFarmers = Object.values(farmers).filter(
+    (f) => f.gender === 'female',
+  ).length;
+
+  // --- Animals Data ---
+  const totalAnimals = Object.values(farmers).reduce((total, f) => {
+    return total + (parseInt(f.goats) || 0) + (parseInt(f.sheep) || 0);
+  }, 0);
+
+  const totalGoats = Object.values(farmers).reduce(
+    (sum, f) => sum + (parseInt(f.goats) || 0),
+    0,
+  );
+  const totalSheep = Object.values(farmers).reduce(
+    (sum, f) => sum + (parseInt(f.sheep) || 0),
+    0,
+  );
+
+  // --- Offtake-based Metrics (filtered by date) ---
+  const totalRevenue = filteredOfftakes.reduce((total, offtake) => {
+    const price = parseInt(offtake.goats?.[0]?.price ?? '0');
+    const live = parseInt(offtake.goats?.[0]?.live ?? '0');
+    return total + price * live;
+  }, 0);
+
+  const uniqueFarmersInOfftake = new Set(filteredOfftakes.map((o) => o.name))
+    .size;
+
+  // --- Widgets Configuration ---
   const widgets: WidgetProps[] = [
     {
       title: 'Farmers',
       backgroundColor: 'primary',
       icon: 'people-fill',
       link: '/orders',
-      description: (farmerData as { description?: string }).description,
-      value: (farmerData as { value: string | number }).value,
+      value: totalFarmers,
+      description: `M: ${maleFarmers} | F: ${femaleFarmers}`,
     },
     {
       title: 'Animals',
       backgroundColor: 'success',
       icon: 'bar-chart-fill',
       link: '/analytics',
-      description: (animalsData as { description?: string }).description,
-      value: (animalsData as { value: string | number }).value,
+      value: totalAnimals,
+      description: `G: ${totalGoats} | S: ${totalSheep}`,
     },
     {
-      title: 'Farmers in offtake',
+      title: 'Farmers in Offtake',
       backgroundColor: 'warning',
       icon: 'person-check-fill',
       link: '/users',
-      description: (farmerInOfftakeData as { description?: string })
-        .description,
-      value: (farmerInOfftakeData as { value: string | number }).value,
+      value: uniqueFarmersInOfftake,
+      description: `${filteredOfftakes.length} total offtakes`,
     },
     {
       title: 'Revenue',
       backgroundColor: 'danger',
-      value: (revenueData as { value: string | number }).value,
       icon: 'currency-dollar',
       link: '/visitors',
-      description: '' + (revenueData as { value: string | number }).value,
+      value: totalRevenue.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'KES',
+        minimumFractionDigits: 0,
+      }),
+      description: `Based on selected dates`,
     },
   ];
-  return (
-    <>
-      {/*begin::Row*/}
-      <div className="row">
-        {/*begin::Col*/}
-        {widgets.map((widget, index) => (
-          <Widget key={index} {...widget} />
-        ))}
-      </div>
 
-      {/*end::Row*/}
-    </>
+  return (
+    <div className="row">
+      {widgets.map((widget, index) => (
+        <Widget key={index} {...widget} />
+      ))}
+    </div>
   );
 };
 

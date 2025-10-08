@@ -6,7 +6,7 @@ import Loader from './Loader';
 import TablesRow from './TablesRow';
 import WidgetsRow from './WidgetsRow';
 
-type Offtake = {
+export type Offtake = {
   county: string;
   date: string;
   gender: string;
@@ -76,11 +76,21 @@ const Content = () => {
   const fromDate = new Date(Date.UTC(year, monthIndex, 1));
   const toDate = new Date(Date.UTC(year, monthIndex + 1, 0, 23, 59, 59, 999));
 
+  console.log(fromDate, toDate);
+
   const filteredOfftakes = useMemo(() => {
     const data = offtakeQuery.data;
-    if (!data || !fromDate || !toDate) return [];
+    if (!data) return [];
 
-    return Object.values(data).filter((item) => {
+    const allOfftakes = Object.values(data);
+
+    // If month/year not selected, return all data
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      return allOfftakes;
+    }
+
+    // Otherwise, filter between fromDate and toDate
+    return allOfftakes.filter((item) => {
       const itemDate = new Date(item.date);
       return itemDate >= fromDate && itemDate <= toDate;
     });
@@ -105,8 +115,14 @@ const Content = () => {
           selectedYear={selectedYear}
           setSelectedYear={setSelectedYear}
         />
-        <WidgetsRow />
-        <TablesRow />
+        <WidgetsRow
+          farmers={farmersQuery.data}
+          filteredOfftakes={filteredOfftakes}
+        />
+        <TablesRow
+          farmers={farmersQuery.data}
+          filteredOfftakes={filteredOfftakes}
+        />
       </div>
       {/*end::Container*/}
     </div>
