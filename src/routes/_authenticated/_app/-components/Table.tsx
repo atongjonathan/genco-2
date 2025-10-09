@@ -16,6 +16,8 @@ interface TableProps {
   loading?: boolean;
   searchable?: boolean;
   pageSize?: number;
+  dateFilter?: boolean;
+  dateColumnKey?: string; // NEW: key for filtering date column
 }
 
 const Table = ({
@@ -24,12 +26,39 @@ const Table = ({
   columns,
   loading = false,
   searchable = true,
+  dateFilter = true,
+  dateColumnKey,
   pageSize = 5,
 }: TableProps) => {
   const [sorting, setSorting] = useState<any>([]);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
 
-  // Add row numbering column as first column
+  // Filter data based on date range if applicable
+  const filteredData = useMemo(() => {
+    if (!dateFilter || !dateColumnKey || (!fromDate && !toDate)) return data;
+
+    const from = fromDate ? new Date(fromDate) : null;
+    const to = toDate ? new Date(toDate) : null;
+
+    return data.filter((row) => {
+      const rawDate = row[dateColumnKey];
+      if (!rawDate) return false;
+
+      // Try parsing: expect something like "26 Sept 2025"
+      const parsedDate = new Date(rawDate);
+
+      if (isNaN(parsedDate.getTime())) return false;
+
+      if (from && parsedDate < from) return false;
+      if (to && parsedDate > to) return false;
+
+      return true;
+    });
+  }, [data, dateFilter, dateColumnKey, fromDate, toDate]);
+
+  // Add row numbering
   const numberedColumns: ColumnDef<Record<string, any>>[] = useMemo(
     () => [
       {
@@ -48,7 +77,7 @@ const Table = ({
   );
 
   const table = useReactTable({
-    data: data ?? [],
+    data: filteredData,
     columns: numberedColumns,
     state: { sorting, globalFilter },
     onSortingChange: setSorting,
@@ -70,30 +99,53 @@ const Table = ({
   return (
     <div className="card card-outline card-secondary mb-4">
       <div className="card-header d-flex align-items-center justify-content-between">
-        {/* <div className=""></div> */}
         <h3 className="card-title mb-0">{title}</h3>
-        {searchable && (
-          <div className="card-tools">
-            <div className="input-group input-group-sm" style={{ width: 180 }}>
-              <input
-                type="text"
-                className="form-control float-right"
-                placeholder="Search..."
-                value={globalFilter ?? ''}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-              />
-              <div className="input-group-append">
-                <button
-                  type="button"
-                  className="btn btn-default"
-                  onClick={() => setGlobalFilter('')}
-                >
-                  <i className="fas fa-xs fa-times"></i>
-                </button>
+        <div className="flex gap-2 d-flex align-items-center">
+          {searchable && (
+            <div className="card-tools me-2">
+              <div
+                className="input-group input-group-sm"
+                style={{ width: 180 }}
+              >
+                <input
+                  type="text"
+                  className="form-control float-right"
+                  placeholder="Search..."
+                  value={globalFilter ?? ''}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                />
+                <div className="input-group-append">
+                  <button
+                    title="Clear"
+                    type="button"
+                    className="btn btn-default"
+                    onClick={() => setGlobalFilter('')}
+                  >
+                    <i className="fas fa-xs fa-times"></i>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+          {dateFilter && dateColumnKey && (
+            <>
+              <input
+                type="date"
+                className="form-control form-control-sm me-2"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                title="From Date"
+              />
+              <input
+                type="date"
+                className="form-control form-control-sm"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                title="To Date"
+              />
+            </>
+          )}
+        </div>
       </div>
 
       <div className="card-body p-0 table-responsive">
@@ -174,13 +226,10 @@ const Table = ({
         </table>
       </div>
 
-      {/* Pagination Controls */}
       <div className="card-footer clearfix">
         <ul className="pagination pagination-sm m-0 float-right">
           <li
-            className={`page-item ${
-              !table.getCanPreviousPage() ? 'disabled' : ''
-            }`}
+            className={`page-item ${!table.getCanPreviousPage() ? 'disabled' : ''}`}
           >
             <button
               className="page-link"
@@ -218,7 +267,8 @@ const Table = ({
           </li>
         </ul>
         <div className="float-left small text-muted">
-          Showing {table.getRowModel().rows.length} of {data.length} entries
+          Showing {table.getRowModel().rows.length} of {filteredData.length}{' '}
+          entries
         </div>
       </div>
     </div>

@@ -1,6 +1,10 @@
 import { Link } from '@tanstack/react-router';
 
-const ContentHeader = () => {
+type ContentHeaderProps = {
+  title: string;
+  url: string;
+};
+const ContentHeader = ({ title, url }: ContentHeaderProps) => {
   return (
     <div className="app-content-header">
       {/*begin::Container*/}
@@ -8,14 +12,14 @@ const ContentHeader = () => {
         {/*begin::Row*/}
         <div className="row">
           <div className="col-sm-6">
-            <h4 className="mb-0">Dashboard</h4>
+            <h4 className="mb-0">{title}</h4>
           </div>
           <div className="col-sm-6">
             <ol className="breadcrumb float-sm-end">
               <li className="breadcrumb-item">
-                <Link to="/">Home</Link>
+                <Link to={url}>Home</Link>
               </li>
-              <li className="breadcrumb-item">Dashboard</li>
+              <li className="breadcrumb-item">{title}</li>
             </ol>
           </div>
         </div>

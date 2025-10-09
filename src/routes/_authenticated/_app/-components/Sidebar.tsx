@@ -1,6 +1,28 @@
 import { Link } from '@tanstack/react-router';
 
+type Link = {
+  icon: string;
+  url: string;
+  text: string;
+};
 const Sidebar = () => {
+  const links: Link[] = [
+    {
+      icon: 'house',
+      url: '/',
+      text: 'Dashboard',
+    },
+    {
+      icon: 'circle',
+      url: '/offtake',
+      text: 'Offtake',
+    },
+    {
+      icon: 'house',
+      url: '/farmer',
+      text: 'Farmers',
+    },
+  ];
   return (
     <aside className="app-sidebar bg-body-secondary shadow">
       {/*begin::Sidebar Brand*/}
@@ -33,18 +55,14 @@ const Sidebar = () => {
             data-accordion="false"
             id="navigation"
           >
-            <li className="nav-item">
-              <Link to="/" className="nav-link">
-                <i className="nav-icon bi bi-house"></i>
-                <p>Dashboard</p>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/offtake" className="nav-link">
-                <i className="nav-icon bi bi-circle"></i>
-                <p>Offtake</p>
-              </Link>
-            </li>
+            {links.map(({ url, text, icon }) => (
+              <li className="nav-item">
+                <Link to={url} className="nav-link">
+                  <i className={`nav-icon bi bi-${icon}`}></i>
+                  <p>{text}</p>
+                </Link>
+              </li>
+            ))}
           </ul>
           {/*end::Sidebar Menu*/}
         </nav>
