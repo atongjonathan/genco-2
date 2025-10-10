@@ -27,6 +27,11 @@ const Sidebar = () => {
       url: '/user',
       text: 'Users',
     },
+    {
+      icon: 'upload',
+      url: '/upload',
+      text: 'Upload',
+    },
   ];
   return (
     <aside className="app-sidebar bg-body-secondary shadow">

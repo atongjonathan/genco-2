@@ -269,6 +269,7 @@ const Table = ({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
+                  className="cursor-pointer"
                   onClick={() => {
                     // console.log('Ckicked');
                     window.location.href = pathname + '/' + row.original.docId;

@@ -31,22 +31,10 @@ function RouteComponent() {
   if (!document) return <div>Document not found</div>;
 
   return (
-    <Card
-      title={document.name}
-      outline
-      footer={
-        <button
-          type="button"
-          className="btn btn-danger"
-          onClick={() => alert('TODO: delete logic')}
-        >
-          Delete
-        </button>
-      }
-      className="m-4"
-    >
+    <Card title={document.name} outline className="m-4">
       <DynamicForm
         document={document}
+        collection="farmers"
         exclude={['docId']}
         onSubmit={async (values) => {
           console.log('Saving farmer:', values);

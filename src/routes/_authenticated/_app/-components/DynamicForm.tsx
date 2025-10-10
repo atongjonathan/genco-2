@@ -1,12 +1,20 @@
 import { type DeepKeys, useForm } from '@tanstack/react-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { deleteDocument } from '../../../../firebase/data';
+import { ConfirmModal } from './ConfirmModal';
 
 type DynamicFormProps<T extends Record<string, any>> = {
+  /** The data object (can have blank values but should contain keys) */
   document: T;
   exclude?: (keyof T)[];
   onSubmit?: (values: T) => Promise<void> | void;
   title?: string;
-  /** Optional: handle special nested structures like Offtake */
-  variant?: 'default' | 'offtake';
+  /** Optional: handles special layouts like Offtake */
+  collection: 'farmers' | 'offtakes' | 'users';
+  isSubmitting?: boolean;
+  isDeleting?: boolean;
+  deleteFn?: () => void;
 };
 
 export function DynamicForm<T extends Record<string, any>>({
@@ -14,7 +22,9 @@ export function DynamicForm<T extends Record<string, any>>({
   exclude = [],
   onSubmit,
   title,
-  variant = 'default',
+  collection,
+  isSubmitting = false,
+  isDeleting = false,
 }: DynamicFormProps<T>) {
   const form = useForm({
     defaultValues: document,
@@ -23,6 +33,7 @@ export function DynamicForm<T extends Record<string, any>>({
     },
   });
 
+  // Always use document keys even if values are blank
   const fieldNames = Object.keys(document).filter(
     (k) => !exclude.includes(k as keyof T),
   ) as (keyof T)[];
@@ -30,189 +41,233 @@ export function DynamicForm<T extends Record<string, any>>({
   const isPrimitive = (v: unknown) =>
     typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteDocument(document.docId, collection),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [`${collection}-data`] });
+      alert('Document deleted successfully!');
+    },
+    onError: () => alert('An error occured!'),
+  });
+
+  const handleDelete = () => {
+    // Your delete logic here
+    deleteMutation.mutate();
+    setShowConfirm(false);
+  };
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-    >
-      {title && <h4 className="mb-3">{title}</h4>}
+    <>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit();
+        }}
+      >
+        {title && <h4 className="mb-3">{title}</h4>}
 
-      <div className="row">
-        {fieldNames.map((name) => (
-          // 🔥 Use dynamic column width: goats -> full width, others -> col-md-4
-          <div
-            key={String(name)}
-            className={name === 'goats' ? 'col-md-12 mb-3' : 'col-md-4 mb-3'}
-          >
-            <form.Field name={name as DeepKeys<T>}>
-              {(field) => {
-                const value = field.state.value;
-                const label = String(name)
-                  .replace(/([A-Z])/g, ' $1')
-                  .replace(/^./, (s) => s.toUpperCase());
+        <div className="row">
+          {fieldNames.map((name) => (
+            <div
+              key={String(name)}
+              className={name === 'goats' ? 'col-md-12 mb-3' : 'col-md-4 mb-3'}
+            >
+              <form.Field name={name as DeepKeys<T>}>
+                {(field) => {
+                  const value = field.state.value;
+                  const label = String(name)
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, (s) => s.toUpperCase());
 
-                // 🐐 Handle array of objects (e.g. goats)
-                if (
-                  Array.isArray(value) &&
-                  value.length > 0 &&
-                  typeof value[0] === 'object'
-                ) {
-                  return (
-                    <div className="mb-4 border p-3 rounded">
-                      <h5 className="mb-3">{label}</h5>
-                      {value.map((item: any, idx: number) => (
-                        <div
-                          key={idx}
-                          className="border p-3 mb-2 rounded bg-light-subtle"
-                        >
-                          <div className="row">
-                            {Object.keys(item).map((k) => (
-                              <div className="col-md-4 mb-2" key={k}>
-                                <label className="form-label text-capitalize">
-                                  {k}
-                                </label>
-                                <input
-                                  title={label}
-                                  className="form-control"
-                                  value={String(item[k] ?? '')}
-                                  onChange={(e) => {
-                                    const newArr = [...value];
-                                    newArr[idx] = {
-                                      ...newArr[idx],
-                                      [k]: e.target.value,
-                                    };
-                                    field.handleChange(newArr as any);
-                                  }}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-danger mt-2"
-                            onClick={() => {
-                              const newArr = value.filter(
-                                (_: any, i: number) => i !== idx,
-                              );
-                              field.handleChange(newArr as any);
-                            }}
+                  // 🐐 Handle array of objects (e.g. goats)
+                  if (
+                    Array.isArray(value) &&
+                    value.length > 0 &&
+                    typeof value[0] === 'object'
+                  ) {
+                    return (
+                      <div className="mb-4 border p-3 rounded">
+                        <h5 className="mb-3">{label}</h5>
+                        {value.map((item: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="border p-3 mb-2 rounded bg-light-subtle"
                           >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
+                            <div className="row">
+                              {Object.keys(item).map((k) => (
+                                <div className="col-md-4 mb-2" key={k}>
+                                  <label className="form-label text-capitalize">
+                                    {k}
+                                  </label>
+                                  <input
+                                    title={label}
+                                    className="form-control"
+                                    value={String(item[k] ?? '')}
+                                    onChange={(e) => {
+                                      const newArr = [...value];
+                                      newArr[idx] = {
+                                        ...newArr[idx],
+                                        [k]: e.target.value,
+                                      };
+                                      field.handleChange(newArr as any);
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-danger mt-2"
+                              onClick={() => {
+                                const newArr = value.filter(
+                                  (_: any, i: number) => i !== idx,
+                                );
+                                field.handleChange(newArr as any);
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
 
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => {
-                          const newArr = [
-                            ...value,
-                            Object.fromEntries(
-                              Object.keys(value[0]).map((k) => [k, '']),
-                            ),
-                          ];
-                          field.handleChange(newArr as any);
-                        }}
-                      >
-                        + Add {label.slice(0, -1)}
-                      </button>
-                    </div>
-                  );
-                }
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => {
+                            const newArr = [
+                              ...value,
+                              Object.fromEntries(
+                                Object.keys(value[0]).map((k) => [k, '']),
+                              ),
+                            ];
+                            field.handleChange(newArr as any);
+                          }}
+                        >
+                          + Add {label.slice(0, -1)}
+                        </button>
+                      </div>
+                    );
+                  }
 
-                // Handle simple primitive fields (text, number, checkbox)
-                if (isPrimitive(value)) {
-                  const inputType =
-                    typeof value === 'number'
-                      ? 'number'
-                      : typeof value === 'boolean'
-                        ? 'checkbox'
-                        : 'text';
+                  // Handle primitive values (including blank strings)
+                  if (
+                    isPrimitive(value) ||
+                    value === '' ||
+                    value === undefined
+                  ) {
+                    const inputType =
+                      typeof value === 'number'
+                        ? 'number'
+                        : typeof value === 'boolean'
+                          ? 'checkbox'
+                          : 'text';
 
-                  return (
-                    <>
-                      <label htmlFor={String(name)} className="form-label">
-                        {label}
-                      </label>
-                      {inputType === 'checkbox' ? (
-                        <div className="form-check">
+                    return (
+                      <>
+                        <label htmlFor={String(name)} className="form-label">
+                          {label}
+                        </label>
+                        {inputType === 'checkbox' ? (
+                          <div className="form-check">
+                            <input
+                              id={String(name)}
+                              type="checkbox"
+                              className="form-check-input"
+                              checked={Boolean(value)}
+                              onChange={(e) =>
+                                field.handleChange(e.target.checked as any)
+                              }
+                            />
+                            <label
+                              className="form-check-label ms-2"
+                              htmlFor={String(name)}
+                            >
+                              {label}
+                            </label>
+                          </div>
+                        ) : (
                           <input
                             id={String(name)}
-                            type="checkbox"
-                            className="form-check-input"
-                            checked={Boolean(value)}
-                            onChange={(e) =>
-                              field.handleChange(e.target.checked as any)
-                            }
-                          />
-                          <label
-                            className="form-check-label ms-2"
-                            htmlFor={String(name)}
-                          >
-                            {label}
-                          </label>
-                        </div>
-                      ) : (
-                        <input
-                          id={String(name)}
-                          type={inputType}
-                          className="form-control"
-                          value={String(value ?? '')}
-                          onChange={(e) =>
-                            field.handleChange(
-                              (inputType === 'number'
-                                ? Number(e.target.value)
-                                : e.target.value) as any,
-                            )
-                          }
-                        />
-                      )}
-                    </>
-                  );
-                }
-
-                // Nested object fallback (rare for Offtake)
-                if (typeof value === 'object' && value !== null) {
-                  return (
-                    <div className="border p-3 rounded mb-3">
-                      <h5>{label}</h5>
-                      {Object.keys(value).map((subKey) => (
-                        <div className="mb-2" key={subKey}>
-                          <label className="form-label text-capitalize">
-                            {subKey}
-                          </label>
-                          <input
-                            title={label}
+                            type={inputType}
                             className="form-control"
-                            value={String((value as any)[subKey] ?? '')}
+                            value={String(value ?? '')}
                             onChange={(e) =>
-                              field.handleChange({
-                                ...(value as any),
-                                [subKey]: e.target.value,
-                              } as any)
+                              field.handleChange(
+                                (inputType === 'number'
+                                  ? Number(e.target.value)
+                                  : e.target.value) as any,
+                              )
                             }
                           />
-                        </div>
-                      ))}
-                    </div>
-                  );
-                }
+                        )}
+                      </>
+                    );
+                  }
 
-                return null;
-              }}
-            </form.Field>
-          </div>
-        ))}
-      </div>
+                  // Nested object fallback
+                  if (typeof value === 'object' && value !== null) {
+                    return (
+                      <div className="border p-3 rounded mb-3">
+                        <h5>{label}</h5>
+                        {Object.keys(value).map((subKey) => (
+                          <div className="mb-2" key={subKey}>
+                            <label className="form-label text-capitalize">
+                              {subKey}
+                            </label>
+                            <input
+                              title={label}
+                              className="form-control"
+                              value={String((value as any)[subKey] ?? '')}
+                              onChange={(e) =>
+                                field.handleChange({
+                                  ...(value as any),
+                                  [subKey]: e.target.value,
+                                } as any)
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
 
-      <div className="d-flex justify-content-end gap-2 mt-3">
-        <button type="submit" className="btn btn-primary">
-          Save
-        </button>
-      </div>
-    </form>
+                  return null;
+                }}
+              </form.Field>
+            </div>
+          ))}
+        </div>
+
+        <div className="d-flex justify-content-end gap-2 mt-3">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Save'}
+          </button>
+          {document.docId && (
+            <button
+              type="button"
+              className="btn btn-danger"
+              disabled={isDeleting}
+              onClick={() => setShowConfirm(true)}
+            >
+              {isSubmitting ? 'Deleting...' : 'Delete'}
+            </button>
+          )}
+        </div>
+      </form>
+      <ConfirmModal
+        show={showConfirm}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this record? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setShowConfirm(false)}
+      />{' '}
+    </>
   );
 }

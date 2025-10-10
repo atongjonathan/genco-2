@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import Loader from '../-components/Loader';
-import type { User } from '../../../../auth';
-import { fetchUsers } from '../../../../firebase/data';
 import Card from '../-components/Card';
 import { DynamicForm } from '../-components/DynamicForm';
+import Loader from '../-components/Loader';
+import type { User } from '../../../../auth';
+import { fetchUsers, updateDocWithId } from '../../../../firebase/data';
 
 export const Route = createFileRoute('/_authenticated/_app/user/$docId')({
   component: RouteComponent,
@@ -18,6 +18,18 @@ function RouteComponent() {
   const usersQuery = useQuery({
     queryKey: ['users-data'],
     queryFn: fetchUsers,
+  });
+
+  const queryClient = useQueryClient();
+
+  const updateMutation = useMutation({
+    mutationFn: (data: Record<string, any>) =>
+      updateDocWithId(docId, data, 'users'),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['users-data'] });
+      alert('User updated successfully!');
+    },
+    onError: () => alert('An error occured!'),
   });
 
   // Find document by ID
@@ -38,26 +50,14 @@ function RouteComponent() {
   if (!document) return <div>Document not found</div>;
 
   return (
-    <Card
-      title={document.name}
-      outline
-      footer={
-        <button
-          type="button"
-          className="btn btn-danger"
-          onClick={() => alert('TODO: delete logic')}
-        >
-          Delete
-        </button>
-      }
-      className="m-4"
-    >
+    <Card title={document.name} outline className="m-4">
       <DynamicForm
         document={document}
-        exclude={['docId']}
+        exclude={['docId', 'createdAt']}
+        collection="users"
+        isSubmitting={updateMutation.isPending}
         onSubmit={async (values) => {
-          console.log('Saving farmer:', values);
-          alert('Saved!');
+          updateMutation.mutate(values);
         }}
       />
     </Card>
