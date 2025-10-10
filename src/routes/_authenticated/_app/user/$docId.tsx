@@ -3,6 +3,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import Loader from '../-components/Loader';
 import type { User } from '../../../../auth';
 import { fetchUsers } from '../../../../firebase/data';
+import Card from '../-components/Card';
+import { DynamicForm } from '../-components/DynamicForm';
 
 export const Route = createFileRoute('/_authenticated/_app/user/$docId')({
   component: RouteComponent,
@@ -36,9 +38,28 @@ function RouteComponent() {
   if (!document) return <div>Document not found</div>;
 
   return (
-    <div>
-      <h1>{document.docId}</h1>
-      <pre>{JSON.stringify(document, null, 2)}</pre>
-    </div>
+    <Card
+      title={document.name}
+      outline
+      footer={
+        <button
+          type="button"
+          className="btn btn-danger"
+          onClick={() => alert('TODO: delete logic')}
+        >
+          Delete
+        </button>
+      }
+      className="m-4"
+    >
+      <DynamicForm
+        document={document}
+        exclude={['docId']}
+        onSubmit={async (values) => {
+          console.log('Saving farmer:', values);
+          alert('Saved!');
+        }}
+      />
+    </Card>
   );
 }

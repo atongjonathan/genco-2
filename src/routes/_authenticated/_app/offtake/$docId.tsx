@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import Card from '../-components/Card';
 import type { Offtake, OfftakeData } from '../-components/Content';
+import { DynamicForm } from '../-components/DynamicForm';
 import Loader from '../-components/Loader';
 import { fetchDataFromRealtimeDB } from '../../../../firebase/database';
 
@@ -36,9 +38,28 @@ function RouteComponent() {
   if (!document) return <div>Document not found</div>;
 
   return (
-    <div>
-      <h1>{document.docId}</h1>
-      <pre>{JSON.stringify(document, null, 2)}</pre>
-    </div>
+    <Card
+      title={document.name}
+      outline
+      footer={
+        <button
+          type="button"
+          className="btn btn-danger"
+          onClick={() => alert('TODO: delete logic')}
+        >
+          Delete
+        </button>
+      }
+      className="m-4"
+    >
+      <DynamicForm
+        document={document}
+        exclude={['docId']}
+        onSubmit={async (values) => {
+          console.log('Saving farmer:', values);
+          alert('Saved!');
+        }}
+      />
+    </Card>
   );
 }
