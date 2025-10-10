@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import type { ColumnDef } from '@tanstack/react-table';
-import { fetchUsers } from '../../../firebase/data';
-import ContentHeader from './-components/ContentHeader';
-import Loader from './-components/Loader';
-import Table from './-components/Table';
+import ContentHeader from '../-components/ContentHeader';
+import Loader from '../-components/Loader';
+import Table from '../-components/Table';
+import { fetchUsers } from '../../../../firebase/data';
 
-export const Route = createFileRoute('/_authenticated/_app/user')({
+export const Route = createFileRoute('/_authenticated/_app/user/')({
   component: RouteComponent,
 });
 
@@ -54,9 +54,9 @@ function RouteComponent() {
   }
   return (
     <>
-      <ContentHeader title="Users" url="/farmer" heading="" />
+      <ContentHeader title="Users" heading="" />
       <div className="card p-4">
-        <Table data={data} title="User Records" columns={columns} />
+        <Table queryData={data} title="User Records" columns={columns} />
       </div>
     </>
   );

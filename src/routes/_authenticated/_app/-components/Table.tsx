@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import {
   type ColumnDef,
   flexRender,
@@ -11,7 +12,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 
 interface TableProps {
-  data: Record<string, any>[];
+  queryData: Record<string, any>[];
   title: string;
   columns: ColumnDef<Record<string, any>>[];
   loading?: boolean;
@@ -21,9 +22,10 @@ interface TableProps {
   dateColumnKey?: string; // NEW: key for filtering date column
   setData?: React.Dispatch<React.SetStateAction<Row<Record<string, any>>[]>>;
 }
+type RowData = Record<string, any>;
 
 const Table = ({
-  data = [],
+  queryData = [],
   title,
   columns,
   loading = false,
@@ -39,6 +41,16 @@ const Table = ({
   const [toDate, setToDate] = useState<string>('');
   const [searchColumn, setSearchColumn] = useState<string>('all');
 
+  const { pathname } = useLocation();
+
+  const data: RowData = Object.entries(queryData ?? {}).map(
+    ([docId, value]) => ({
+      docId,
+      ...value,
+    }),
+  );
+
+  const navigate = useNavigate();
   // Custom global filter: apply only to selected column or all columns
   function customGlobalFilter(row: any, filterValue: string) {
     if (!filterValue) return true;
@@ -64,7 +76,7 @@ const Table = ({
     const from = fromDate ? new Date(fromDate) : null;
     const to = toDate ? new Date(toDate) : null;
 
-    return data.filter((row) => {
+    return data.filter((row: any) => {
       const rawDate = row[dateColumnKey];
       if (!rawDate) return false;
 
@@ -255,7 +267,13 @@ const Table = ({
               </tr>
             ) : hasData ? (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
+                <tr
+                  key={row.id}
+                  onClick={() => {
+                    // console.log('Ckicked');
+                    window.location.href = pathname + '/' + row.original.docId;
+                  }}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id}>
                       {flexRender(

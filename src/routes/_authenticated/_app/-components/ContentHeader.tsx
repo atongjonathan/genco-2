@@ -2,10 +2,9 @@ import { Link } from '@tanstack/react-router';
 
 type ContentHeaderProps = {
   title: string;
-  url: string;
   heading: string;
 };
-const ContentHeader = ({ title, url, heading = '' }: ContentHeaderProps) => {
+const ContentHeader = ({ title, heading = '' }: ContentHeaderProps) => {
   return (
     <div className="app-content-header">
       {/*begin::Container*/}
@@ -18,7 +17,7 @@ const ContentHeader = ({ title, url, heading = '' }: ContentHeaderProps) => {
           <div className="col-sm-2">
             <ol className="breadcrumb float-sm-end">
               <li className="breadcrumb-item">
-                <Link to={url}>Home</Link>
+                <Link to={'/'}>Home</Link>
               </li>
               {title !== 'Dashboard' && (
                 <li className="breadcrumb-item">{title}</li>

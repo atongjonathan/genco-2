@@ -141,7 +141,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Revenue (KES)', accessorKey: 'totalRev' },
       ],
-      data: revDistributionPerCountyData,
+      queryData: revDistributionPerCountyData,
     },
     {
       title: 'Farmers in Offtake Per County',
@@ -149,7 +149,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Farmers', accessorKey: 'farmers' },
       ],
-      data: farmersInOfftakeData,
+      queryData: farmersInOfftakeData ?? [],
     },
     {
       title: 'Animal Census Per County',
@@ -159,7 +159,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'Cattle', accessorKey: 'totalCattle' },
         { header: 'Sheep', accessorKey: 'totalSheep' },
       ],
-      data: animalCensusData,
+      queryData: animalCensusData,
     },
     {
       title: 'Farmers Registered Per County',
@@ -167,7 +167,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Total Farmers', accessorKey: 'farmers' },
       ],
-      data: farmersRegisteredData,
+      queryData: farmersRegisteredData,
     },
     {
       title: 'Counties Per Revenue',
@@ -175,7 +175,7 @@ const TablesRow = ({ farmers, filteredOfftakes }: TablesRowProps) => {
         { header: 'County', accessorKey: 'county' },
         { header: 'Revenue (KES)', accessorKey: 'revenue' },
       ],
-      data: countiesPerRevenueData,
+      queryData: countiesPerRevenueData,
     },
   ];
 

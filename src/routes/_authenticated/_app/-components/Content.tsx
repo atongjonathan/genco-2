@@ -79,8 +79,6 @@ const Content = () => {
   const fromDate = new Date(Date.UTC(year, monthIndex, 1));
   const toDate = new Date(Date.UTC(year, monthIndex + 1, 0, 23, 59, 59, 999));
 
-  console.log(fromDate, toDate);
-
   const filteredOfftakes = useMemo(() => {
     const data = offtakeQuery.data;
     if (!data) return [];
@@ -98,8 +96,6 @@ const Content = () => {
       return itemDate >= fromDate && itemDate <= toDate;
     });
   }, [offtakeQuery.data, fromDate, toDate]);
-
-  if (filteredOfftakes.length > 0) console.log('Filtered', filteredOfftakes);
 
   if (offtakeQuery.isError) {
     console.log('Offtake Error:', offtakeQuery.error);

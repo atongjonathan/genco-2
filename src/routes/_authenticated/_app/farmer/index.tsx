@@ -2,13 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import type { ColumnDef, Row } from '@tanstack/react-table';
 import { useState } from 'react';
-import { fetchDataFromRealtimeDB } from '../../../firebase/database';
-import type { FarmersData } from './-components/Content';
-import ContentHeader from './-components/ContentHeader';
-import Loader from './-components/Loader';
-import Table from './-components/Table';
+import type { FarmersData } from '../-components/Content';
+import ContentHeader from '../-components/ContentHeader';
+import Loader from '../-components/Loader';
+import Table from '../-components/Table';
+import { fetchDataFromRealtimeDB } from '../../../../firebase/database';
 
-export const Route = createFileRoute('/_authenticated/_app/farmer')({
+export const Route = createFileRoute('/_authenticated/_app/farmer/')({
   component: RouteComponent,
 });
 
@@ -78,10 +78,10 @@ function RouteComponent() {
 
   return (
     <>
-      <ContentHeader title="Farmers" url="/farmer" heading={heading} />
+      <ContentHeader title="Farmers" heading={heading} />
       <div className="card p-4">
         <Table
-          data={data}
+          queryData={farmerQuery.data as unknown as Record<string, any>[]}
           title={`Farmer Records`}
           columns={columns}
           setData={setFilteredData}

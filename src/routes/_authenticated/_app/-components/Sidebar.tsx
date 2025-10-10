@@ -33,7 +33,7 @@ const Sidebar = () => {
       {/*begin::Sidebar Brand*/}
       <div className="sidebar-brand">
         {/*begin::Brand Link*/}
-        <a href="./index.html" className="brand-link">
+        <Link to="/" className="brand-link">
           {/*begin::Brand Image*/}
           <img
             src="/logo%20copy.png"
@@ -44,7 +44,7 @@ const Sidebar = () => {
           {/*begin::Brand Text*/}
           <span className="brand-text fw-light">Savanna Herds</span>
           {/*end::Brand Text*/}
-        </a>
+        </Link>
         {/*end::Brand Link*/}
       </div>
       {/*end::Sidebar Brand*/}

@@ -2,13 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import type { Row } from '@tanstack/react-table';
 import { useState } from 'react';
-import { fetchDataFromRealtimeDB } from '../../../firebase/database';
-import type { OfftakeData } from './-components/Content';
-import ContentHeader from './-components/ContentHeader';
-import Loader from './-components/Loader';
-import Table from './-components/Table';
+import type { OfftakeData } from '../-components/Content';
+import ContentHeader from '../-components/ContentHeader';
+import Loader from '../-components/Loader';
+import Table from '../-components/Table';
+import { fetchDataFromRealtimeDB } from '../../../../firebase/database';
 
-export const Route = createFileRoute('/_authenticated/_app/offtake')({
+export const Route = createFileRoute('/_authenticated/_app/offtake/')({
   component: RouteComponent,
 });
 
@@ -86,12 +86,11 @@ function RouteComponent() {
     <>
       <ContentHeader
         title="Offtake"
-        url="/offtake"
         heading={`| Total Amount: ${totalAmount} | Total Goats No: ${totalGoats} | Average Amount: ${avgAmount} | Average LW: ${avgLW} | Average CW: ${avgCW}`}
       />
       <div className="card p-4">
         <Table
-          data={data}
+          queryData={offtakeQuery.data as unknown as Record<string, any>[]}
           title="Offtake Records"
           columns={columns}
           dateColumnKey="date"
