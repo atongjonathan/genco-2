@@ -1,10 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import Card from '../-components/Card';
 import type { Farmer, FarmersData } from '../-components/Content';
 import { DynamicForm } from '../-components/DynamicForm';
 import Loader from '../-components/Loader';
-import { fetchDataFromRealtimeDB } from '../../../../firebase/database';
+import {
+  fetchDataFromRealtimeDB,
+  updateDataInRealtimeDB,
+} from '../../../../firebase/database';
 
 export const Route = createFileRoute('/_authenticated/_app/farmer/$docId')({
   component: RouteComponent,
@@ -18,6 +22,15 @@ function RouteComponent() {
     queryFn: () => fetchDataFromRealtimeDB<FarmersData>('farmers'),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: (data: Record<string, any>) =>
+      updateDataInRealtimeDB('farmers/' + docId, data),
+    onSuccess: async () => {
+      await offtakeQuery.refetch();
+      toast.success('Farmer updated successfully!');
+    },
+    onError: (err) => toast.error(err.message),
+  });
   const data = Object.entries(offtakeQuery.data ?? {}).map(([id, value]) => ({
     docId: id,
     ...value,
@@ -37,8 +50,7 @@ function RouteComponent() {
         collection="farmers"
         exclude={['docId']}
         onSubmit={async (values) => {
-          console.log('Saving farmer:', values);
-          alert('Saved!');
+          updateMutation.mutate(values);
         }}
       />
     </Card>

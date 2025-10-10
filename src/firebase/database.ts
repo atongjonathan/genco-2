@@ -1,5 +1,5 @@
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { child, get, getDatabase, ref } from 'firebase/database';
+import { child, get, getDatabase, ref, remove, update } from 'firebase/database';
 
 const db = getDatabase();
 const auth = getAuth();
@@ -21,4 +21,17 @@ export const fetchDataFromRealtimeDB = async <T = unknown>(
   } else {
     return [] as unknown as T;
   }
+};
+
+export const deleteDataFromRealtimeDB = async (path: string): Promise<void> => {
+  const dbRef = ref(db, path);
+  await remove(dbRef);
+};
+
+export const updateDataInRealtimeDB = async (
+  path: string,
+  data: Record<string, any>,
+): Promise<void> => {
+  const dbRef = ref(db, path);
+  await update(dbRef, data);
 };

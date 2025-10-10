@@ -1,9 +1,10 @@
 import { type DeepKeys, useForm } from '@tanstack/react-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { deleteDocument } from '../../../../firebase/data';
+import { deleteDataFromRealtimeDB } from '../../../../firebase/database';
 import { ConfirmModal } from './ConfirmModal';
 
 type DynamicFormProps<T extends Record<string, any>> = {
@@ -26,7 +27,6 @@ export function DynamicForm<T extends Record<string, any>>({
   title,
   collection,
   isSubmitting = false,
-  isDeleting = false,
 }: DynamicFormProps<T>) {
   const form = useForm({
     defaultValues: document,
@@ -47,12 +47,20 @@ export function DynamicForm<T extends Record<string, any>>({
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const splittedPathname = pathname.split('/');
+  const prevPath = splittedPathname[splittedPathname.length - 2];
   const deleteMutation = useMutation({
-    mutationFn: () => deleteDocument(collection, document.docId),
+    mutationFn: () => {
+      if (collection === 'users') {
+        return deleteDocument(collection, document.docId);
+      }
+      return deleteDataFromRealtimeDB(`${collection}/${document.docId}`);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [`${collection}-data`] });
-      navigate({ to: '/farmer' });
       toast.success('Document deleted successfully!');
+      navigate({ to: '/' + prevPath });
     },
     onError: (err) => toast.error(err.message),
   });
@@ -258,10 +266,10 @@ export function DynamicForm<T extends Record<string, any>>({
             <button
               type="button"
               className="btn btn-danger"
-              disabled={isDeleting}
+              disabled={deleteMutation.isPending}
               onClick={() => setShowConfirm(true)}
             >
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
             </button>
           )}
         </div>
