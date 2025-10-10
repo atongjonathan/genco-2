@@ -66,7 +66,7 @@ const Sidebar = () => {
             id="navigation"
           >
             {links.map(({ url, text, icon }) => (
-              <li className="nav-item">
+              <li className="nav-item" key={url}>
                 <Link to={url} className="nav-link">
                   <i className={`nav-icon bi bi-${icon}`}></i>
                   <p>{text}</p>

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import Card from '../-components/Card';
 import { DynamicForm } from '../-components/DynamicForm';
 import Loader from '../-components/Loader';
@@ -27,9 +28,9 @@ function RouteComponent() {
       updateDocWithId(docId, data, 'users'),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['users-data'] });
-      alert('User updated successfully!');
+      toast.success('User updated successfully!');
     },
-    onError: () => alert('An error occured!'),
+    onError: (err) => toast.error(err.message),
   });
 
   // Find document by ID
@@ -53,7 +54,7 @@ function RouteComponent() {
     <Card title={document.name} outline className="m-4">
       <DynamicForm
         document={document}
-        exclude={['docId', 'createdAt']}
+        exclude={['docId', 'createdAt', 'uid']}
         collection="users"
         isSubmitting={updateMutation.isPending}
         onSubmit={async (values) => {

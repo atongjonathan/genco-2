@@ -1,6 +1,8 @@
 import { type DeepKeys, useForm } from '@tanstack/react-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { deleteDocument } from '../../../../firebase/data';
 import { ConfirmModal } from './ConfirmModal';
 
@@ -14,7 +16,7 @@ type DynamicFormProps<T extends Record<string, any>> = {
   collection: 'farmers' | 'offtakes' | 'users';
   isSubmitting?: boolean;
   isDeleting?: boolean;
-  deleteFn?: () => void;
+  onDelete?: () => void;
 };
 
 export function DynamicForm<T extends Record<string, any>>({
@@ -44,13 +46,15 @@ export function DynamicForm<T extends Record<string, any>>({
   const [showConfirm, setShowConfirm] = useState(false);
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const deleteMutation = useMutation({
-    mutationFn: () => deleteDocument(document.docId, collection),
+    mutationFn: () => deleteDocument(collection, document.docId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [`${collection}-data`] });
-      alert('Document deleted successfully!');
+      navigate({ to: '/farmer' });
+      toast.success('Document deleted successfully!');
     },
-    onError: () => alert('An error occured!'),
+    onError: (err) => toast.error(err.message),
   });
 
   const handleDelete = () => {
@@ -158,8 +162,9 @@ export function DynamicForm<T extends Record<string, any>>({
                     value === '' ||
                     value === undefined
                   ) {
-                    const inputType =
-                      typeof value === 'number'
+                    const inputType = field.name?.includes('password')
+                      ? 'password'
+                      : typeof value === 'number'
                         ? 'number'
                         : typeof value === 'boolean'
                           ? 'checkbox'
@@ -256,7 +261,7 @@ export function DynamicForm<T extends Record<string, any>>({
               disabled={isDeleting}
               onClick={() => setShowConfirm(true)}
             >
-              {isSubmitting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </button>
           )}
         </div>

@@ -13,9 +13,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/_app/index'
+import { Route as AuthenticatedAppUploadRouteImport } from './routes/_authenticated/_app/upload'
 import { Route as AuthenticatedAppUserIndexRouteImport } from './routes/_authenticated/_app/user/index'
 import { Route as AuthenticatedAppOfftakeIndexRouteImport } from './routes/_authenticated/_app/offtake/index'
 import { Route as AuthenticatedAppFarmerIndexRouteImport } from './routes/_authenticated/_app/farmer/index'
+import { Route as AuthenticatedAppUserNewRouteImport } from './routes/_authenticated/_app/user/new'
 import { Route as AuthenticatedAppUserDocIdRouteImport } from './routes/_authenticated/_app/user/$docId'
 import { Route as AuthenticatedAppOfftakeDocIdRouteImport } from './routes/_authenticated/_app/offtake/$docId'
 import { Route as AuthenticatedAppFarmerDocIdRouteImport } from './routes/_authenticated/_app/farmer/$docId'
@@ -38,6 +40,11 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppUploadRoute = AuthenticatedAppUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppUserIndexRoute =
   AuthenticatedAppUserIndexRouteImport.update({
     id: '/user/',
@@ -56,6 +63,11 @@ const AuthenticatedAppFarmerIndexRoute =
     path: '/farmer/',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppUserNewRoute = AuthenticatedAppUserNewRouteImport.update({
+  id: '/user/new',
+  path: '/user/new',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppUserDocIdRoute =
   AuthenticatedAppUserDocIdRouteImport.update({
     id: '/user/$docId',
@@ -77,20 +89,24 @@ const AuthenticatedAppFarmerDocIdRoute =
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
+  '/upload': typeof AuthenticatedAppUploadRoute
   '/': typeof AuthenticatedAppIndexRoute
   '/farmer/$docId': typeof AuthenticatedAppFarmerDocIdRoute
   '/offtake/$docId': typeof AuthenticatedAppOfftakeDocIdRoute
   '/user/$docId': typeof AuthenticatedAppUserDocIdRoute
+  '/user/new': typeof AuthenticatedAppUserNewRoute
   '/farmer': typeof AuthenticatedAppFarmerIndexRoute
   '/offtake': typeof AuthenticatedAppOfftakeIndexRoute
   '/user': typeof AuthenticatedAppUserIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/upload': typeof AuthenticatedAppUploadRoute
   '/': typeof AuthenticatedAppIndexRoute
   '/farmer/$docId': typeof AuthenticatedAppFarmerDocIdRoute
   '/offtake/$docId': typeof AuthenticatedAppOfftakeDocIdRoute
   '/user/$docId': typeof AuthenticatedAppUserDocIdRoute
+  '/user/new': typeof AuthenticatedAppUserNewRoute
   '/farmer': typeof AuthenticatedAppFarmerIndexRoute
   '/offtake': typeof AuthenticatedAppOfftakeIndexRoute
   '/user': typeof AuthenticatedAppUserIndexRoute
@@ -100,10 +116,12 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/_authenticated/_app/upload': typeof AuthenticatedAppUploadRoute
   '/_authenticated/_app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/_app/farmer/$docId': typeof AuthenticatedAppFarmerDocIdRoute
   '/_authenticated/_app/offtake/$docId': typeof AuthenticatedAppOfftakeDocIdRoute
   '/_authenticated/_app/user/$docId': typeof AuthenticatedAppUserDocIdRoute
+  '/_authenticated/_app/user/new': typeof AuthenticatedAppUserNewRoute
   '/_authenticated/_app/farmer/': typeof AuthenticatedAppFarmerIndexRoute
   '/_authenticated/_app/offtake/': typeof AuthenticatedAppOfftakeIndexRoute
   '/_authenticated/_app/user/': typeof AuthenticatedAppUserIndexRoute
@@ -112,20 +130,24 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
+    | '/upload'
     | '/'
     | '/farmer/$docId'
     | '/offtake/$docId'
     | '/user/$docId'
+    | '/user/new'
     | '/farmer'
     | '/offtake'
     | '/user'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/upload'
     | '/'
     | '/farmer/$docId'
     | '/offtake/$docId'
     | '/user/$docId'
+    | '/user/new'
     | '/farmer'
     | '/offtake'
     | '/user'
@@ -134,10 +156,12 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/_app'
+    | '/_authenticated/_app/upload'
     | '/_authenticated/_app/'
     | '/_authenticated/_app/farmer/$docId'
     | '/_authenticated/_app/offtake/$docId'
     | '/_authenticated/_app/user/$docId'
+    | '/_authenticated/_app/user/new'
     | '/_authenticated/_app/farmer/'
     | '/_authenticated/_app/offtake/'
     | '/_authenticated/_app/user/'
@@ -178,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/upload': {
+      id: '/_authenticated/_app/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof AuthenticatedAppUploadRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/user/': {
       id: '/_authenticated/_app/user/'
       path: '/user'
@@ -197,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/farmer'
       fullPath: '/farmer'
       preLoaderRoute: typeof AuthenticatedAppFarmerIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/user/new': {
+      id: '/_authenticated/_app/user/new'
+      path: '/user/new'
+      fullPath: '/user/new'
+      preLoaderRoute: typeof AuthenticatedAppUserNewRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
     '/_authenticated/_app/user/$docId': {
@@ -224,20 +262,24 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppUploadRoute: typeof AuthenticatedAppUploadRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppFarmerDocIdRoute: typeof AuthenticatedAppFarmerDocIdRoute
   AuthenticatedAppOfftakeDocIdRoute: typeof AuthenticatedAppOfftakeDocIdRoute
   AuthenticatedAppUserDocIdRoute: typeof AuthenticatedAppUserDocIdRoute
+  AuthenticatedAppUserNewRoute: typeof AuthenticatedAppUserNewRoute
   AuthenticatedAppFarmerIndexRoute: typeof AuthenticatedAppFarmerIndexRoute
   AuthenticatedAppOfftakeIndexRoute: typeof AuthenticatedAppOfftakeIndexRoute
   AuthenticatedAppUserIndexRoute: typeof AuthenticatedAppUserIndexRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppUploadRoute: AuthenticatedAppUploadRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppFarmerDocIdRoute: AuthenticatedAppFarmerDocIdRoute,
   AuthenticatedAppOfftakeDocIdRoute: AuthenticatedAppOfftakeDocIdRoute,
   AuthenticatedAppUserDocIdRoute: AuthenticatedAppUserDocIdRoute,
+  AuthenticatedAppUserNewRoute: AuthenticatedAppUserNewRoute,
   AuthenticatedAppFarmerIndexRoute: AuthenticatedAppFarmerIndexRoute,
   AuthenticatedAppOfftakeIndexRoute: AuthenticatedAppOfftakeIndexRoute,
   AuthenticatedAppUserIndexRoute: AuthenticatedAppUserIndexRoute,
