@@ -5,9 +5,10 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  type Row,
   useReactTable,
 } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface TableProps {
   data: Record<string, any>[];
@@ -18,6 +19,7 @@ interface TableProps {
   pageSize?: number;
   dateFilter?: boolean;
   dateColumnKey?: string; // NEW: key for filtering date column
+  setData?: React.Dispatch<React.SetStateAction<Row<Record<string, any>>[]>>;
 }
 
 const Table = ({
@@ -29,11 +31,31 @@ const Table = ({
   dateFilter = true,
   dateColumnKey,
   pageSize = 5,
+  setData,
 }: TableProps) => {
   const [sorting, setSorting] = useState<any>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
+  const [searchColumn, setSearchColumn] = useState<string>('all');
+
+  // Custom global filter: apply only to selected column or all columns
+  function customGlobalFilter(row: any, filterValue: string) {
+    if (!filterValue) return true;
+
+    if (searchColumn === 'all') {
+      return row
+        .getAllCells()
+        .some((cell: any) =>
+          String(cell.getValue())
+            .toLowerCase()
+            .includes(filterValue.toLowerCase()),
+        );
+    }
+
+    const value = row.getValue(searchColumn);
+    return String(value).toLowerCase().includes(filterValue.toLowerCase());
+  }
 
   // Filter data based on date range if applicable
   const filteredData = useMemo(() => {
@@ -96,13 +118,44 @@ const Table = ({
 
   const hasData = table.getRowModel().rows.length > 0;
 
+  useEffect(() => {
+    if (setData) {
+      setData(table.getFilteredRowModel().rows);
+    }
+  }, [globalFilter, sorting]);
+
   return (
     <div className="card card-outline card-secondary mb-4">
       <div className="card-header d-flex align-items-center justify-content-between">
         <h3 className="card-title mb-0">{title}</h3>
         <div className="flex gap-2 d-flex align-items-center">
           {searchable && (
-            <div className="card-tools me-2">
+            <div className="card-tools me-2 d-flex align-items-center gap-2">
+              <select
+                title="Column"
+                className="form-select form-select-sm me-2"
+                value={searchColumn}
+                onChange={(e) => setSearchColumn(e.target.value)}
+                style={{ width: 150 }}
+              >
+                <option value="all">All Columns</option>
+                {columns.map((col) => {
+                  if (
+                    'accessorKey' in col &&
+                    typeof col.accessorKey === 'string'
+                  ) {
+                    return (
+                      <option key={col.accessorKey} value={col.accessorKey}>
+                        {typeof col.header === 'string'
+                          ? col.header
+                          : col.accessorKey}
+                      </option>
+                    );
+                  }
+                  return null;
+                })}
+              </select>
+
               <div
                 className="input-group input-group-sm"
                 style={{ width: 180 }}
@@ -110,7 +163,7 @@ const Table = ({
                 <input
                   type="text"
                   className="form-control float-right"
-                  placeholder="Search..."
+                  placeholder={`Search...`}
                   value={globalFilter ?? ''}
                   onChange={(e) => setGlobalFilter(e.target.value)}
                 />
@@ -127,6 +180,7 @@ const Table = ({
               </div>
             </div>
           )}
+
           {dateFilter && dateColumnKey && (
             <>
               <input

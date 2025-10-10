@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import type { ColumnDef, Row } from '@tanstack/react-table';
+import { useState } from 'react';
 import { fetchDataFromRealtimeDB } from '../../../firebase/database';
 import type { FarmersData } from './-components/Content';
 import ContentHeader from './-components/ContentHeader';
@@ -11,30 +13,16 @@ export const Route = createFileRoute('/_authenticated/_app/farmer')({
 });
 
 function RouteComponent() {
-  const offtakeQuery = useQuery({
+  const farmerQuery = useQuery({
     queryKey: ['farmer-data'],
     queryFn: () => fetchDataFromRealtimeDB<FarmersData>('farmers'),
   });
-  const ex = {
-    ageGroup: '7-12',
-    cattle: '25',
-    county: 'Samburu',
-    farmerId: 'SAM0004',
-    gender: 'female',
-    goats: '25',
-    idNumber: '234677',
-    location: 'Testing ',
-    name: 'Testing ',
-    phone: '735229184',
-    registrationDate: '26 Sept 2025',
-    sheep: '25',
-    subcounty: 'Samburu East',
-    traceability: true,
-    vaccinated: true,
-    vaccineType: 'PPR',
-  };
 
-  const columns = [
+  const [filteredData, setFilteredData] = useState<Row<Record<string, any>>[]>(
+    [],
+  );
+
+  const columns: ColumnDef<FarmersData>[] = [
     { accessorKey: 'ageGroup', header: 'Age Group' },
     { accessorKey: 'cattle', header: 'Cattle' },
     { accessorKey: 'county', header: 'County' },
@@ -42,29 +30,62 @@ function RouteComponent() {
     { accessorKey: 'gender', header: 'Gender' },
     { accessorKey: 'location', header: 'Location' },
     { accessorKey: 'name', header: 'Name' },
-    { accessorKey: 'phone', header: 'Phone' },
-    { accessorKey: 'registrationDate', header: 'Registration Date' },
+    {
+      accessorKey: 'phone',
+      header: 'Phone',
+      cell: ({ getValue }) => {
+        const raw = getValue();
+        return typeof raw === 'number' ? String(raw) : (raw ?? '');
+      },
+    },
+    { accessorKey: 'registrationDate', header: 'Reg Date' },
     { accessorKey: 'sheep', header: 'Sheep' },
     { accessorKey: 'subcounty', header: 'Sub County' },
-    { accessorKey: 'traceability', header: 'Traceability' },
-    { accessorKey: 'vaccinated', header: 'Traceability' },
+    {
+      accessorKey: 'traceability',
+      header: 'Traceability',
+      cell: ({ getValue }) => (getValue() ? 'Yes' : 'No'),
+    },
+    {
+      accessorKey: 'vaccinated',
+      header: 'Traceability',
+      cell: ({ getValue }) => (getValue() ? 'Yes' : 'No'),
+    },
     { accessorKey: 'vaccineType', header: 'Vaccine Type' },
   ];
 
-  const data = Object.values(offtakeQuery.data ?? []);
+  const data = Object.values(farmerQuery.data ?? []);
 
-  if (offtakeQuery.isLoading) {
+  if (farmerQuery.isLoading) {
     return <Loader />;
   }
 
-  if (offtakeQuery.isError) {
+  if (farmerQuery.isError) {
     return <div>Error loading data</div>;
   }
+
+  const totalGoats = filteredData.reduce(
+    (sum, row) => sum + parseInt(row.original.goats),
+    0,
+  );
+  const maleFarmers = filteredData.filter(
+    (row) => row.original.gender == 'male',
+  ).length;
+  const femaleFarmers = filteredData.filter(
+    (row) => row.original.gender == 'female',
+  ).length;
+  const heading = `Livestock Farmers | Total Goats: ${totalGoats} | Total Farmers: ${data.length} | Male Farmers: ${maleFarmers} | Female Farmers: ${femaleFarmers}`;
+
   return (
     <>
-      <ContentHeader title="Farmers" url="/farmer" />
+      <ContentHeader title="Farmers" url="/farmer" heading={heading} />
       <div className="card p-4">
-        <Table data={data} title="Farmers Records" columns={columns} />
+        <Table
+          data={data}
+          title={`Farmer Records`}
+          columns={columns}
+          setData={setFilteredData}
+        />
       </div>
     </>
   );

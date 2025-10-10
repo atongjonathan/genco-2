@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/_app/index'
+import { Route as AuthenticatedAppUserRouteImport } from './routes/_authenticated/_app/user'
 import { Route as AuthenticatedAppOfftakeRouteImport } from './routes/_authenticated/_app/offtake'
 import { Route as AuthenticatedAppFarmerRouteImport } from './routes/_authenticated/_app/farmer'
 
@@ -34,6 +35,11 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppUserRoute = AuthenticatedAppUserRouteImport.update({
+  id: '/user',
+  path: '/user',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppOfftakeRoute = AuthenticatedAppOfftakeRouteImport.update({
   id: '/offtake',
   path: '/offtake',
@@ -49,12 +55,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/farmer': typeof AuthenticatedAppFarmerRoute
   '/offtake': typeof AuthenticatedAppOfftakeRoute
+  '/user': typeof AuthenticatedAppUserRoute
   '/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/farmer': typeof AuthenticatedAppFarmerRoute
   '/offtake': typeof AuthenticatedAppOfftakeRoute
+  '/user': typeof AuthenticatedAppUserRoute
   '/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -64,13 +72,14 @@ export interface FileRoutesById {
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/_app/farmer': typeof AuthenticatedAppFarmerRoute
   '/_authenticated/_app/offtake': typeof AuthenticatedAppOfftakeRoute
+  '/_authenticated/_app/user': typeof AuthenticatedAppUserRoute
   '/_authenticated/_app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/farmer' | '/offtake' | '/'
+  fullPaths: '/login' | '/farmer' | '/offtake' | '/user' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/farmer' | '/offtake' | '/'
+  to: '/login' | '/farmer' | '/offtake' | '/user' | '/'
   id:
     | '__root__'
     | '/_authenticated'
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app'
     | '/_authenticated/_app/farmer'
     | '/_authenticated/_app/offtake'
+    | '/_authenticated/_app/user'
     | '/_authenticated/_app/'
   fileRoutesById: FileRoutesById
 }
@@ -116,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/user': {
+      id: '/_authenticated/_app/user'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof AuthenticatedAppUserRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/offtake': {
       id: '/_authenticated/_app/offtake'
       path: '/offtake'
@@ -136,12 +153,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppFarmerRoute: typeof AuthenticatedAppFarmerRoute
   AuthenticatedAppOfftakeRoute: typeof AuthenticatedAppOfftakeRoute
+  AuthenticatedAppUserRoute: typeof AuthenticatedAppUserRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppFarmerRoute: AuthenticatedAppFarmerRoute,
   AuthenticatedAppOfftakeRoute: AuthenticatedAppOfftakeRoute,
+  AuthenticatedAppUserRoute: AuthenticatedAppUserRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 

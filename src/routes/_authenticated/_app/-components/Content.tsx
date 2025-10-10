@@ -19,10 +19,13 @@ export type Offtake = {
   location: string;
   name: string;
   phone: string;
+  subcounty: string;
+  totalGoats: number;
+  totalPrice: number;
 };
 export type OfftakeData = Record<string, Offtake>;
 
-type Farmer = {
+export type Farmer = {
   ageGroup: string;
   cattle: string;
   county: string;
