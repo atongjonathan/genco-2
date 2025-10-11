@@ -9,8 +9,8 @@ import {
   type Row,
   useReactTable,
 } from '@tanstack/react-table';
+import { download, generateCsv, mkConfig } from 'export-to-csv';
 import { useEffect, useMemo, useState } from 'react';
-
 interface TableProps {
   queryData: Record<string, any>[];
   title: string;
@@ -21,6 +21,7 @@ interface TableProps {
   dateFilter?: boolean;
   dateColumnKey?: string; // NEW: key for filtering date column
   setData?: React.Dispatch<React.SetStateAction<Row<Record<string, any>>[]>>;
+  exportFn?: () => void;
 }
 type RowData = Record<string, any>;
 
@@ -34,6 +35,7 @@ const Table = ({
   dateColumnKey,
   pageSize = 5,
   setData,
+  exportFn,
 }: TableProps) => {
   const [sorting, setSorting] = useState<any>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -42,6 +44,15 @@ const Table = ({
   const [searchColumn, setSearchColumn] = useState<string>('all');
 
   const { pathname } = useLocation();
+
+  const filename =
+    document.title + `${new Date().toISOString().replace(/[:.]/g, '-')}`;
+  const csvConfig = mkConfig({
+    fieldSeparator: ',',
+    filename,
+    decimalSeparator: '.',
+    useKeysAsHeaders: true,
+  });
 
   const data: RowData = Object.entries(queryData ?? {}).map(
     ([docId, value]) => ({
@@ -210,6 +221,92 @@ const Table = ({
                 title="To Date"
               />
             </>
+          )}
+          {exportFn && (
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => {
+                const plainData = table
+                  .getPrePaginationRowModel()
+                  .rows.map((row) => row.original);
+
+                const processedRows: any = plainData.flatMap((item: any) => {
+                  // 🧠 Detect if the row is of type Offtake (has a 'goats' array)
+                  if (Array.isArray(item.goats)) {
+                    const entries = item.goats.map(
+                      (goat: any, index: number) => ({
+                        Date: item.date,
+                        'Farmer Name': item.name,
+                        Gender: item.gender || 'N/A',
+                        'ID Number': item.idNumber || 'N/A',
+                        'Phone Number': item.phone,
+                        Location: item.location,
+                        County: item.county,
+                        Subcounty: item.subcounty,
+                        'Count No': index + 1,
+                        'Live Weight': goat.live,
+                        'Carcass Weight': goat.carcass,
+                        Price: goat.price,
+                        'Total Amount': '', // Left blank in detail rows
+                      }),
+                    );
+
+                    // ➕ Add summary and spacing
+                    const totalCount = item.totalGoats || item.goats.length;
+                    const totalPrice = item.totalPrice || '0';
+
+                    entries.push({} as any);
+                    entries.push({
+                      'Count No': `Total: ${totalCount}`,
+                      Date: '',
+                      'Farmer Name': '',
+                      Gender: '',
+                      'ID Number': '',
+                      'Phone Number': '',
+                      Location: '',
+                      County: '',
+                      Subcounty: '',
+                      'Live Weight': '',
+                      'Carcass Weight': '',
+                      Price: '',
+                      'Total Amount': `Total: ${totalPrice}`,
+                    } as any);
+                    entries.push({} as any);
+                    entries.push({} as any);
+
+                    return entries;
+                  } else {
+                    // 🧹 Fallback: flatten generic object
+                    const flat: Record<
+                      string,
+                      string | number | boolean | null
+                    > = {};
+                    for (const key in item) {
+                      if (key === 'docId') continue;
+                      const value = item[key];
+                      if (
+                        typeof value === 'object' &&
+                        value !== null &&
+                        !Array.isArray(value)
+                      ) {
+                        flat[key] = JSON.stringify(value);
+                      } else if (Array.isArray(value)) {
+                        flat[key] = JSON.stringify(value);
+                      } else {
+                        flat[key] = value as any;
+                      }
+                    }
+                    return [flat];
+                  }
+                });
+
+                const csv = generateCsv(csvConfig)(processedRows);
+                download(csvConfig)(csv);
+              }}
+            >
+              Export
+            </button>
           )}
         </div>
       </div>

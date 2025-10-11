@@ -85,6 +85,7 @@ function RouteComponent() {
           title={`Farmer Records`}
           columns={columns}
           setData={setFilteredData}
+          exportFn={() => console.log('Export')}
         />
       </div>
     </>

@@ -33,8 +33,6 @@ function RouteComponent() {
     { accessorKey: 'totalPrice', header: 'Total Price' },
   ];
 
-  const data = Object.values(offtakeQuery.data ?? []);
-
   if (offtakeQuery.isLoading) {
     return <Loader />;
   }
@@ -95,6 +93,7 @@ function RouteComponent() {
           columns={columns}
           dateColumnKey="date"
           setData={setFilteredData}
+          exportFn={() => console.log('Export')}
         />
       </div>
     </>

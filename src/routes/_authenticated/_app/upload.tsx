@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useRef, useState } from 'react';
 import { read, utils } from 'xlsx';
+import { createDataInRealtimeDB } from '../../../firebase/database';
 import Card from './-components/Card';
 import Loader from './-components/Loader';
 
@@ -20,7 +21,7 @@ function RouteComponent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  // Handle file upload
+  // ✅ Handle file upload
   const handleFileUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -49,18 +50,21 @@ function RouteComponent() {
     parseExcel(file, category);
   };
 
-  // Parse Excel or CSV file
+  // ✅ Parse Excel / CSV File with Project 1 Logic
   const parseExcel = (file: File, category: string) => {
     const reader = new FileReader();
+
     reader.onload = async (event) => {
       if (!event.target?.result) return;
 
       const data = new Uint8Array(event.target.result as ArrayBuffer);
       const workbook = read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
       let parsedData: any[] = utils.sheet_to_json(sheet, { raw: false });
 
-      // Optional: attempt to convert excel dates
+      // ✅ Convert Excel-friendly dates
       parsedData = parsedData.map((row) => {
         for (const key in row) {
           if (isExcelDate(row[key])) {
@@ -72,39 +76,39 @@ function RouteComponent() {
 
       await uploadToFirestore(parsedData, category);
     };
+
     reader.readAsArrayBuffer(file);
   };
 
+  // ✅ Check if a value looks like a date
   const isExcelDate = (value: any): boolean => {
-    return typeof value === 'string' && /\d{4}-\d{2}-\d{2}/.test(value);
+    return (
+      typeof value === 'string' &&
+      (/\d{4}-\d{2}-\d{2}/.test(value) || !isNaN(Date.parse(value)))
+    );
   };
 
+  // ✅ Convert to YYYY-MM-DD format
   const convertExcelDate = (excelDate: string): string => {
-    return new Date(excelDate).toISOString().split('T')[0];
+    const parsedDate = new Date(Date.parse(excelDate));
+    return parsedDate.toISOString().split('T')[0];
   };
 
+  // ✅ Upload data row-by-row with progress
   const uploadToFirestore = async (data: any[], category: string) => {
     try {
       const totalItems = data.length;
       let uploaded = 0;
 
       for (const row of data) {
-        // const ref = await addDocument(category, row);
-        // const snap = await getDoc(ref);
-        // console.log('Exists?', snap.exists());
-
+        await createDataInRealtimeDB(category, row);
         uploaded++;
         setUploadProgress(Math.round((uploaded / totalItems) * 100));
       }
 
+      // ✅ Refresh relevant queries
       await queryClient.invalidateQueries({ queryKey: [`${category}-data`] });
-      const refech = await queryClient.refetchQueries({
-        queryKey: [`${category}-data`],
-      });
-      console.log(refech);
-
-      // const fresh = await fetchDataFromRealtimeDB(category);
-      // console.log('Fetched after upload:', fresh);
+      await queryClient.refetchQueries({ queryKey: [`${category}-data`] });
 
       setError({
         variant: 'success',
@@ -203,6 +207,7 @@ function RouteComponent() {
                 </>
               )}
             </button>
+
             <button
               type="button"
               className="btn btn-outline-secondary"

@@ -21,6 +21,7 @@
     "admin-lte": "^4.0.0-rc4",
     "bootstrap": "^5.3.8",
     "clsx": "^2.1.1",
+    "export-to-csv": "^1.4.0",
     "firebase": "^12.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
