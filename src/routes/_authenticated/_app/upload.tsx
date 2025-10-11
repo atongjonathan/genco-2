@@ -4,7 +4,6 @@ import { useRef, useState } from 'react';
 import { read, utils } from 'xlsx';
 import { createDataInRealtimeDB } from '../../../firebase/database';
 import Card from './-components/Card';
-import Loader from './-components/Loader';
 
 export const Route = createFileRoute('/_authenticated/_app/upload')({
   component: RouteComponent,
@@ -127,17 +126,27 @@ function RouteComponent() {
   };
 
   return (
-    <div className="container mt-4">
-      <h3 className="mb-4">
-        <i className="fas fa-upload me-2 text-primary" />
-        Upload Data
-      </h3>
+    <div className="container p-3">
+      <h6 className="mb-4">Upload Data</h6>
 
       {error && (
         <div className={`alert alert-${error.variant}`}>{error.message}</div>
       )}
 
-      {isUploading && <Loader text="Uploading..." />}
+      {isUploading && (
+        <div
+          style={{
+            minHeight: '10vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
 
       <Card title="Upload File" outline>
         <form onSubmit={handleFileUpload}>
