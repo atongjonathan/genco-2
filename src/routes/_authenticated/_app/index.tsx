@@ -9,7 +9,7 @@ export const Route = createFileRoute('/_authenticated/_app/')({
 function RouteComponent() {
   return (
     <>
-      <ContentHeader title="Dashboard" url="/" heading="" />
+      <ContentHeader title="Dashboard" heading="" />
       <Content />
     </>
   );

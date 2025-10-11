@@ -13,7 +13,6 @@ const Widget: React.FC<WidgetProps> = ({
   title,
   value,
   icon,
-  link,
   backgroundColor,
   description,
 }) => {
