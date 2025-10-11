@@ -56,7 +56,12 @@ function RouteComponent() {
     <>
       <ContentHeader title="Users" heading="" />
       <div className="card p-4">
-        <Table queryData={data} title="User Records" columns={columns} />
+        <Table
+          queryData={data}
+          title="User Records"
+          columns={columns}
+          searchable={false}
+        />
       </div>
     </>
   );

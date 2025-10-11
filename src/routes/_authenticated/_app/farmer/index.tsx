@@ -86,6 +86,7 @@ function RouteComponent() {
           columns={columns}
           setData={setFilteredData}
           exportFn={() => console.log('Export')}
+          searchable={false}
         />
       </div>
     </>
