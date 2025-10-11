@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from '@tanstack/react-router';
+import { useLocation } from '@tanstack/react-router';
 import {
   type ColumnDef,
   flexRender,
@@ -61,24 +61,23 @@ const Table = ({
     }),
   );
 
-  const navigate = useNavigate();
   // Custom global filter: apply only to selected column or all columns
-  function customGlobalFilter(row: any, filterValue: string) {
-    if (!filterValue) return true;
+  // function customGlobalFilter(row: any, filterValue: string) {
+  //   if (!filterValue) return true;
 
-    if (searchColumn === 'all') {
-      return row
-        .getAllCells()
-        .some((cell: any) =>
-          String(cell.getValue())
-            .toLowerCase()
-            .includes(filterValue.toLowerCase()),
-        );
-    }
+  //   if (searchColumn === 'all') {
+  //     return row
+  //       .getAllCells()
+  //       .some((cell: any) =>
+  //         String(cell.getValue())
+  //           .toLowerCase()
+  //           .includes(filterValue.toLowerCase()),
+  //       );
+  //   }
 
-    const value = row.getValue(searchColumn);
-    return String(value).toLowerCase().includes(filterValue.toLowerCase());
-  }
+  //   const value = row.getValue(searchColumn);
+  //   return String(value).toLowerCase().includes(filterValue.toLowerCase());
+  // }
 
   // Filter data based on date range if applicable
   const filteredData = useMemo(() => {
