@@ -60,7 +60,7 @@ function RouteComponent() {
           queryData={data}
           title="User Records"
           columns={columns}
-          searchable={false}
+          searchable={true}
         />
       </div>
     </>
