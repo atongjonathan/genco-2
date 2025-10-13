@@ -119,6 +119,26 @@ const Table = ({
     ],
     [columns, pageSize],
   );
+  const customGlobalFilter = (
+    row: Row<any>,
+    columnId: string,
+    filterValue: string,
+  ) => {
+    if (!filterValue) return true;
+
+    if (columnId === 'all') {
+      return row.getAllCells().some((cell) =>
+        String(cell.getValue() ?? '')
+          .toLowerCase()
+          .includes(filterValue.toLowerCase()),
+      );
+    }
+
+    const value = row.getValue(columnId);
+    return String(value ?? '')
+      .toLowerCase()
+      .includes(filterValue.toLowerCase());
+  };
 
   const table = useReactTable({
     data: filteredData,
@@ -130,6 +150,8 @@ const Table = ({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    globalFilterFn: (row, columnId, filterValue) =>
+      customGlobalFilter(row, searchColumn, filterValue),
     initialState: {
       pagination: {
         pageIndex: 0,
