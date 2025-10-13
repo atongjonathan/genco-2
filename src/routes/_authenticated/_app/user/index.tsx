@@ -43,8 +43,6 @@ function RouteComponent() {
 
   const data = Object.values(usersQuery.data ?? []);
 
-  console.log(data);
-
   if (usersQuery.isLoading) {
     return <Loader />;
   }

@@ -71,7 +71,9 @@ const Sidebar = () => {
                 <Link
                   to={url}
                   className="nav-link"
-                  onClick={handleSidebarToggle}
+                  onClick={() => {
+                    if (window.innerWidth < 768) handleSidebarToggle();
+                  }}
                 >
                   <i className={`nav-icon bi bi-${icon}`}></i>
                   <p>{text}</p>
