@@ -1,6 +1,16 @@
 import { useAuth } from '@/auth';
 import React, { useEffect } from 'react';
 
+export const handleSidebarToggle = () => {
+  const body = document.body;
+  if (body.classList.contains('sidebar-open')) {
+    body.classList.remove('sidebar-open');
+    body.classList.add('sidebar-collapse');
+  } else {
+    body.classList.remove('sidebar-collapse');
+    body.classList.add('sidebar-open');
+  }
+};
 const Header = () => {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
@@ -34,18 +44,6 @@ const Header = () => {
     document.addEventListener('click', handleDocumentClick);
     return () => document.removeEventListener('click', handleDocumentClick);
   }, []);
-
-  const handleSidebarToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const body = document.body;
-    if (body.classList.contains('sidebar-open')) {
-      body.classList.remove('sidebar-open');
-      body.classList.add('sidebar-collapse');
-    } else {
-      body.classList.remove('sidebar-collapse');
-      body.classList.add('sidebar-open');
-    }
-  };
 
   const handleLogout = () => {
     logout();

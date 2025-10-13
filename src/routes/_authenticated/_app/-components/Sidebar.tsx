@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { handleSidebarToggle } from './Header';
 
 type Link = {
   icon: string;
@@ -67,7 +68,11 @@ const Sidebar = () => {
           >
             {links.map(({ url, text, icon }) => (
               <li className="nav-item" key={url}>
-                <Link to={url} className="nav-link">
+                <Link
+                  to={url}
+                  className="nav-link"
+                  onClick={handleSidebarToggle}
+                >
                   <i className={`nav-icon bi bi-${icon}`}></i>
                   <p>{text}</p>
                 </Link>
