@@ -69,7 +69,7 @@ const WidgetsRow = ({ farmers, filteredOfftakes }: WidgetsRowProps) => {
     {
       title: 'Offtake',
       backgroundColor: 'warning',
-      icon: 'person-check-fill',
+      icon: 'person-fill',
       link: '/users',
       value: uniqueFarmersInOfftake,
       description: `${filteredOfftakes.length} total offtakes`,

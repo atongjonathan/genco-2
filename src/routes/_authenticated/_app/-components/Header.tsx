@@ -124,6 +124,8 @@ const Header = () => {
               </li>
             </ul>
           </li>
+          <span className="hidden-xs uppercase my-auto">{user?.name}</span>
+
           {/*end::User Menu Dropdown*/}
         </ul>
         {/*end::End Navbar Links*/}
