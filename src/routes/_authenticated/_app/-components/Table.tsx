@@ -100,7 +100,7 @@ const Table = ({
 
       return true;
     });
-  }, [data, dateFilter, dateColumnKey, fromDate, toDate]);
+  }, [data.length, dateFilter, dateColumnKey, fromDate, toDate]);
 
   // Add row numbering
   const numberedColumns: ColumnDef<Record<string, any>>[] = useMemo(
